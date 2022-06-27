@@ -67,8 +67,8 @@ uninstall:
 	cd src && cd $(INSTALL_LIB) && $(RM) $(TO_LIB)
 	cd doc && cd $(INSTALL_MAN) && $(RM) $(TO_MAN)
 
-local:
-	$(MAKE) install INSTALL_TOP=../install
+build:
+	$(MAKE) install INSTALL_TOP=../build
 
 # make may get confused with install/ if it does not support .PHONY.
 dummy:
