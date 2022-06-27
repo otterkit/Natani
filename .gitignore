@@ -53,3 +53,6 @@ dkms.conf
 
 # Build folder
 build/
+
+# Please stop
+.DS_Store
