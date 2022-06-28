@@ -844,7 +844,7 @@ typedef struct ConsControl {
 
 
 static void recfield (LexState *ls, ConsControl *cc) {
-  /* recfield -> (NAME | '['exp']') = exp */
+  /* recfield -> (NAME | '['exp']') := exp */
   FuncState *fs = ls->fs;
   int reg = ls->fs->freereg;
   expdesc tab, key, val;
@@ -855,7 +855,7 @@ static void recfield (LexState *ls, ConsControl *cc) {
   else  /* ls->t.token == '[' */
     yindex(ls, &key);
   cc->nh++;
-  checknext(ls, '=');
+  checknext(ls, TK_ASSIGN);
   tab = *cc->t;
   luaK_indexed(fs, &tab, &key);
   expr(ls, &val);
@@ -903,7 +903,7 @@ static void field (LexState *ls, ConsControl *cc) {
   /* field -> listfield | recfield */
   switch(ls->t.token) {
     case TK_NAME: {  /* may be 'listfield' or 'recfield' */
-      if (luaX_lookahead(ls) != '=')  /* expression? */
+      if (luaX_lookahead(ls) != TK_ASSIGN)  /* expression? */
         listfield(ls, cc);
       else
         recfield(ls, cc);
@@ -1218,7 +1218,7 @@ static BinOpr getbinopr (int op) {
     case TK_SHR: return OPR_SHR;
     case TK_CONCAT: return OPR_CONCAT;
     case TK_NE: return OPR_NE;
-    case TK_EQ: return OPR_EQ;
+    case '=': return OPR_EQ;
     case '<': return OPR_LT;
     case TK_LE: return OPR_LE;
     case '>': return OPR_GT;
@@ -1245,7 +1245,7 @@ static const struct {
    {7, 7}, {7, 7},           /* '<<' '>>' */
    {9, 8},                   /* '..' (right associative) */
    {3, 3}, {3, 3}, {3, 3},   /* ==, <, <= */
-   {3, 3}, {3, 3}, {3, 3},   /* ~=, >, >= */
+   {3, 3}, {3, 3}, {3, 3},   /* !=, >, >= */
    {2, 2}, {1, 1}            /* and, or */
 };
 
@@ -1369,7 +1369,7 @@ static void check_conflict (LexState *ls, struct LHS_assign *lh, expdesc *v) {
 ** (a 'suffixedexp') was already read by the caller.
 **
 ** assignment -> suffixedexp restassign
-** restassign -> ',' suffixedexp restassign | '=' explist
+** restassign -> ',' suffixedexp restassign | ':=' explist
 */
 static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
   expdesc e;
@@ -1385,9 +1385,9 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
     restassign(ls, &nv, nvars+1);
     leavelevel(ls);
   }
-  else {  /* restassign -> '=' explist */
+  else {  /* restassign -> ':=' explist */
     int nexps;
-    checknext(ls, '=');
+    checknext(ls, TK_ASSIGN);
     nexps = explist(ls, &e);
     if (nexps != nvars)
       adjust_assign(ls, nvars, nexps, &e);
@@ -1573,7 +1573,7 @@ static void fornum (LexState *ls, TString *varname, int line) {
   new_localvarliteral(ls, "(for state)");
   new_localvarliteral(ls, "(for state)");
   new_localvar(ls, varname);
-  checknext(ls, '=');
+  checknext(ls, TK_ASSIGN);
   exp1(ls);  /* initial value */
   checknext(ls, ',');
   exp1(ls);  /* limit */
@@ -1625,9 +1625,9 @@ static void forstat (LexState *ls, int line) {
   luaX_next(ls);  /* skip 'for' */
   varname = str_checkname(ls);  /* first variable name */
   switch (ls->t.token) {
-    case '=': fornum(ls, varname, line); break;
+    case TK_ASSIGN: fornum(ls, varname, line); break;
     case ',': case TK_IN: forlist(ls, varname); break;
-    default: luaX_syntaxerror(ls, "'=' or 'in' expected");
+    default: luaX_syntaxerror(ls, "':=' or 'in' expected");
   }
   check_match(ls, TK_END, TK_FOR, line);
   leaveblock(fs);  /* loop scope ('break' jumps to this point) */
@@ -1723,7 +1723,7 @@ static void checktoclose (FuncState *fs, int level) {
 
 
 static void localstat (LexState *ls) {
-  /* stat -> LOCAL NAME ATTRIB { ',' NAME ATTRIB } ['=' explist] */
+  /* stat -> LOCAL NAME ATTRIB { ',' NAME ATTRIB } [':=' explist] */
   FuncState *fs = ls->fs;
   int toclose = -1;  /* index of to-be-closed variable (if any) */
   Vardesc *var;  /* last variable */
@@ -1742,7 +1742,7 @@ static void localstat (LexState *ls) {
     }
     nvars++;
   } while (testnext(ls, ','));
-  if (testnext(ls, '='))
+  if (testnext(ls, TK_ASSIGN))
     nexps = explist(ls, &e);
   else {
     e.k = VVOID;
@@ -1796,7 +1796,7 @@ static void exprstat (LexState *ls) {
   FuncState *fs = ls->fs;
   struct LHS_assign v;
   suffixedexp(ls, &v.v);
-  if (ls->t.token == '=' || ls->t.token == ',') { /* stat -> assignment ? */
+  if (ls->t.token == TK_ASSIGN || ls->t.token == ',') { /* stat -> assignment ? */
     v.prev = NULL;
     restassign(ls, &v, 1);
   }

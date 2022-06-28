@@ -1,0 +1,32 @@
+// This is a comment
+
+//[[
+    This is a long comment
+]]//
+
+fn main()
+    local var := 10
+    print(var=2)
+    print(var!=2)
+    print(var/2)
+    print(var/:2)
+
+    local longString := 
+    "String contac?" ..
+    " HEwwwoooo?" ..
+    " Nyaaaaa :3"
+
+    print(longString)
+
+    if var = 5 then
+        print("Nyaa")
+    else
+        print("Meoww")
+    end
+end
+
+main()
+
+//[[
+    
+]]//

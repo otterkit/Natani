@@ -28,8 +28,8 @@
 static void PrintFunction(const Proto* f, int full);
 #define luaU_print	PrintFunction
 
-#define PROGNAME	"luac"		/* default program name */
-#define OUTPUT		PROGNAME ".out"	/* default output file */
+#define PROGNAME "natanic"		/* default program name */
+#define OUTPUT PROGNAME ".ntix"	/* default output file */
 
 static int listing=0;			/* list bytecodes? */
 static int dumping=1;			/* dump bytecodes? */

@@ -4,7 +4,7 @@
 ** See Copyright Notice in lua.h
 */
 
-#define lua_c
+#define natani_c
 
 #include "lprefix.h"
 
@@ -22,7 +22,7 @@
 
 
 #if !defined(LUA_PROGNAME)
-#define LUA_PROGNAME		"lua"
+#define LUA_PROGNAME		"natani"
 #endif
 
 #if !defined(LUA_INIT_VAR)
