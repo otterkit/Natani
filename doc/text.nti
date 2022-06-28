@@ -40,8 +40,10 @@ fn main()
 
     if var = 5 then
         print("Nyaa")
-    else
+    elseif var = 10 then
         print("Meoww")
+    else
+        print("Meewww")
     end
 end
 
