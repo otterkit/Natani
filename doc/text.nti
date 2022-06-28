@@ -5,13 +5,33 @@
 ]]//
 
 fn main()
-    local var := 10
+
+    let table := [:
+        12, 23, 42, 52, 62
+    :]
+
+    let dict := [:
+        ["A"] := "hello",
+        ["C"] := "World",
+        ["B"] := "Weird",
+        ["D"] := "Natani"
+    :]
+
+    for index, data in ipairs(table) do
+        print(data)
+    end
+
+    for key, value in pairs(dict) do
+        print(key,value)
+    end
+
+    let var := 10
     print(var=2)
     print(var!=2)
     print(var/2)
     print(var/:2)
 
-    local longString := 
+    let longString := 
     "String contac?" ..
     " HEwwwoooo?" ..
     " Nyaaaaa :3"

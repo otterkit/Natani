@@ -922,7 +922,7 @@ static void field (LexState *ls, ConsControl *cc) {
 
 
 static void constructor (LexState *ls, expdesc *t) {
-  /* constructor -> '{' [ field { sep field } [sep] ] '}'
+  /* constructor -> TK_OPENARR [ field { sep field } [sep] ] TK_CLOSEARR
      sep -> ',' | ';' */
   FuncState *fs = ls->fs;
   int line = ls->linenumber;
@@ -934,14 +934,14 @@ static void constructor (LexState *ls, expdesc *t) {
   init_exp(t, VNONRELOC, fs->freereg);  /* table will be at stack top */
   luaK_reserveregs(fs, 1);
   init_exp(&cc.v, VVOID, 0);  /* no value (yet) */
-  checknext(ls, '{');
+  checknext(ls, TK_OPENARR);
   do {
     lua_assert(cc.v.k == VVOID || cc.tostore > 0);
-    if (ls->t.token == '}') break;
+    if (ls->t.token == TK_CLOSEARR) break;
     closelistfield(fs, &cc);
     field(ls, &cc);
   } while (testnext(ls, ',') || testnext(ls, ';'));
-  check_match(ls, '}', '{', line);
+  check_match(ls, TK_CLOSEARR, TK_OPENARR, line);
   lastlistfield(fs, &cc);
   luaK_settablesize(fs, pc, t->u.info, cc.na, cc.nh);
 }
@@ -1038,7 +1038,7 @@ static void funcargs (LexState *ls, expdesc *f, int line) {
       check_match(ls, ')', '(', line);
       break;
     }
-    case '{': {  /* funcargs -> constructor */
+    case TK_OPENARR: {  /* funcargs -> constructor */
       constructor(ls, &args);
       break;
     }
@@ -1125,7 +1125,7 @@ static void suffixedexp (LexState *ls, expdesc *v) {
         funcargs(ls, v, line);
         break;
       }
-      case '(': case TK_STRING: case '{': {  /* funcargs */
+      case '(': case TK_STRING: case TK_OPENARR: {  /* funcargs */
         luaK_exp2nextreg(fs, v);
         funcargs(ls, v, line);
         break;
@@ -1173,7 +1173,7 @@ static void simpleexp (LexState *ls, expdesc *v) {
       init_exp(v, VVARARG, luaK_codeABC(fs, OP_VARARG, 0, 0, 1));
       break;
     }
-    case '{': {  /* constructor */
+    case TK_OPENARR: {  /* constructor */
       constructor(ls, v);
       return;
     }
